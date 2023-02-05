@@ -1,0 +1,3 @@
+C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/pioasm/CMakeFiles/pioasm.dir
+C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/pioasm/CMakeFiles/edit_cache.dir
+C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/pioasm/CMakeFiles/rebuild_cache.dir

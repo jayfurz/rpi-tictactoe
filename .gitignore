@@ -1,2 +1,13 @@
 .vscode
 
+# Ignore cmake build artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+elf2uf2/
+generated/
+pico-sdk/
+pioasm/
+.bin
+.dis
+.hex

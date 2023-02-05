@@ -13,7 +13,7 @@ file(MAKE_DIRECTORY
   "C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/pico-sdk/src/rp2_common/cyw43_driver/pioasm/src/PioasmBuild-stamp"
 )
 
-set(configSubDirs Debug;Release;MinSizeRel;RelWithDebInfo)
+set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
     file(MAKE_DIRECTORY "C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/pico-sdk/src/rp2_common/cyw43_driver/pioasm/src/PioasmBuild-stamp/${subDir}")
 endforeach()

@@ -13,7 +13,7 @@ file(MAKE_DIRECTORY
   "C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/elf2uf2/src/ELF2UF2Build-stamp"
 )
 
-set(configSubDirs Debug;Release;MinSizeRel;RelWithDebInfo)
+set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
     file(MAKE_DIRECTORY "C:/Users/justi/OneDrive/Documents/masters_courses/ece_520/sp23-e520-lab3-rpi-tic-tac-toe-jayfurz/src/elf2uf2/src/ELF2UF2Build-stamp/${subDir}")
 endforeach()
