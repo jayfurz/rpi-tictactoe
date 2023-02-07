@@ -174,26 +174,31 @@ private:
 
   void FlashBothPlayersLeds() {
     int i = 0;
-    while (i < 3) {
-      gpio_put(LED_GREEN, false);
-      gpio_put(LED_RED, false);
-      busy_wait_ms(FLASH_DELAY);
-      gpio_put(LED_GREEN, true);
-      gpio_put(LED_RED, true);
-      busy_wait_ms(FLASH_DELAY);
-      i++;
+    while (true) {
+      if (!gpio_get(BUTTON_3)) {
+        gpio_put(LED_GREEN, false);
+        gpio_put(LED_RED, false);
+        busy_wait_ms(FLASH_DELAY);
+        gpio_put(LED_GREEN, true);
+        gpio_put(LED_RED, true);
+        busy_wait_ms(FLASH_DELAY);
+        i++;
+      }
+      else return;
     }
   }
 
   void FlashCurrentPlayerLed() {
     int current_led = current_player_.GetLed();
     int i = 0;
-    while (i < 3) {
+    while (true) {
+      if (!gpio_get(BUTTON_3)) {
       gpio_put(current_led, false);
       busy_wait_ms(FLASH_DELAY);
       gpio_put(current_led, true);
       busy_wait_ms(FLASH_DELAY);
       i++;
+      } else return;
     }
     return;
   }
