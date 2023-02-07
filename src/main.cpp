@@ -2,14 +2,15 @@
 #include <chrono>
 #include <iostream>
 #include <stdio.h>
-#include <thread>
 #include <vector>
 
 #define LED_GREEN 15
 #define LED_RED 14
 #define BUTTON_1 16
 #define BUTTON_2 17
+#define BUTTON_3 18
 #define GPIO_FALLING 0x04
+#define FLASH_DELAY 500
 
 class CurrentPlayer {
 public:
@@ -23,7 +24,12 @@ public:
   void TurnOffGreenLed() { gpio_put(LED_GREEN, false); }
   void TurnOffRedLed() { gpio_put(LED_RED, false); }
   // Function to switch between players
-  void SwitchPlayer() {
+  void SwitchPlayer(bool reset = false) {
+    if (reset) {
+      player_ = 2;
+      TurnOffGreenLed();
+      TurnOffRedLed();
+    }
     if (player_ == 1) {
       player_ = 2;
       symbol_ = 'O';
@@ -45,6 +51,7 @@ public:
   // Getters for the player and symbol
   int GetPlayer() const { return player_; }
   char GetSymbol() const { return symbol_; }
+  int GetLed() const { return led_; }
 
   // Getters for the current row and column
   int row() const { return row_; }
@@ -62,11 +69,13 @@ public:
       col_ = 0;
     }
     PrintSelectedSquare();
+    return;
   }
 
   // Function for printing the selected square
   void PrintSelectedSquare() {
     printf("Player %d is currently on square (%d, %d).\n", player_, row_, col_);
+    return;
   }
 
 private:
@@ -82,36 +91,130 @@ private:
 class TicTacToe {
 public:
   TicTacToe() : board_(3, std::vector<char>(3, ' ')), current_player_() {}
-  void MoveSelector() { current_player_.Move(); }
+  void MoveSelector() {
+    if (!isGameOver) {
+      return current_player_.Move();
+    }
+  }
 
   void MakeMove() {
-    if (board_[current_player_.row()][current_player_.col()] != ' ') {
-      std::cout
-          << "this cell is already occupied. please choose a different cell."
-          << std::endl;
+    if (!isGameOver) {
+      if (board_[current_player_.row()][current_player_.col()] != ' ') {
+        std::cout
+            << "this cell is already occupied. please choose a different cell."
+            << std::endl;
+        return;
+      }
+      // place the player's symbol in the cell
+      board_[current_player_.row()][current_player_.col()] =
+          current_player_.GetSymbol();
+      PrintGameBoard();
+      if (!CheckWinCondition()) {
+        current_player_.SwitchPlayer();
+      }
       return;
     }
-    // place the player's symbol in the cell
-    board_[current_player_.row()][current_player_.col()] =
-        current_player_.GetSymbol();
-    PrintGameBoard();
-    current_player_.SwitchPlayer();
+  }
+
+  void Reset() {
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        board_[i][j] = ' ';
+      }
+    }
+    current_player_.SwitchPlayer(true);
+    isGameOver = false;
+    printf("Game reset!");
+  }
+
+private:
+  bool CheckWinCondition() {
+    for (int i = 0; i < 3; i++) {
+      if ((board_[i][0] == board_[i][1] && board_[i][1] == board_[i][2] &&
+           board_[i][2] == current_player_.GetSymbol()) ||
+          (board_[0][i] == board_[1][i] && board_[1][i] == board_[2][i] &&
+           board_[2][i] == current_player_.GetSymbol()) ||
+          (board_[0][0] == board_[1][1] && board_[1][1] == board_[2][2] &&
+           board_[2][2] == current_player_.GetSymbol()) ||
+          (board_[0][2] == board_[1][1] && board_[1][1] == board_[2][0] &&
+           board_[2][0] == current_player_.GetSymbol())) {
+        WinGame();
+        isGameOver = true;
+        return isGameOver;
+      } else if (isTieGame()) {
+        TieGame();
+        isGameOver = true;
+        return isGameOver;
+      }
+    }
+    return false;
+  }
+
+  bool isTieGame() {
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if (board_[i][j] == ' ') {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  void TieGame() {
+    printf("Tie game!");
+    FlashBothPlayersLeds();
+  }
+
+  void WinGame() {
+    printf("Player %d won!", current_player_.GetPlayer());
+    FlashCurrentPlayerLed();
+    return;
+  }
+
+  void FlashBothPlayersLeds() {
+    int i = 0;
+    while (i < 3) {
+      gpio_put(LED_GREEN, false);
+      gpio_put(LED_RED, false);
+      busy_wait_ms(FLASH_DELAY);
+      gpio_put(LED_GREEN, true);
+      gpio_put(LED_RED, true);
+      busy_wait_ms(FLASH_DELAY);
+      i++;
+    }
+  }
+
+  void FlashCurrentPlayerLed() {
+    int current_led = current_player_.GetLed();
+    int i = 0;
+    while (i < 3) {
+      gpio_put(current_led, false);
+      busy_wait_ms(FLASH_DELAY);
+      gpio_put(current_led, true);
+      busy_wait_ms(FLASH_DELAY);
+      i++;
+    }
+    return;
   }
 
   void PrintGameBoard() {
     std::cout << std::endl << "\t \t|\t \t|\t \t\n";
-    std::cout << "\t" << board_[0][0] <<"\t|\t" << board_[0][1] << "\t|\t" << board_[0][2] << "\t\n";
+    std::cout << "\t" << board_[0][0] << "\t|\t" << board_[0][1] << "\t|\t"
+              << board_[0][2] << "\t\n";
     std::cout << "________________|_______________|_______________\n";
     std::cout << "\t \t|\t \t|\t \t\n";
-    std::cout << "\t" << board_[1][0] <<"\t|\t" << board_[1][1] << "\t|\t" << board_[1][2] << "\t\n";
+    std::cout << "\t" << board_[1][0] << "\t|\t" << board_[1][1] << "\t|\t"
+              << board_[1][2] << "\t\n";
     std::cout << "________________|_______________|_______________\n";
     std::cout << "\t \t|\t \t|\t \t\n";
-    std::cout << "\t" << board_[2][0] <<"\t|\t" << board_[2][1] << "\t|\t" << board_[2][2] << "\t\n";
+    std::cout << "\t" << board_[2][0] << "\t|\t" << board_[2][1] << "\t|\t"
+              << board_[2][2] << "\t\n";
   }
 
-private:
   std::vector<std::vector<char>> board_;
   CurrentPlayer current_player_;
+  bool isGameOver = false;
 };
 
 // Make global instances of tic-tac-toe board
@@ -124,12 +227,15 @@ void SetupHardware() {
   gpio_init(LED_GREEN);
   gpio_init(BUTTON_1);
   gpio_init(BUTTON_2);
+  gpio_init(BUTTON_3);
   gpio_set_dir(LED_RED, GPIO_OUT);
   gpio_set_dir(LED_GREEN, GPIO_OUT);
   gpio_set_dir(BUTTON_1, GPIO_IN);
   gpio_set_dir(BUTTON_2, GPIO_IN);
+  gpio_set_dir(BUTTON_3, GPIO_IN);
   gpio_pull_down(BUTTON_1);
   gpio_pull_down(BUTTON_2);
+  gpio_pull_down(BUTTON_3);
 }
 
 // Debounce control
@@ -138,9 +244,11 @@ const int debounce_delay = 80;
 
 void HandleButtonPress(uint gpio) {
   if (gpio == BUTTON_1) {
-    tic_tac_toe.MoveSelector();
-  } else {
-    tic_tac_toe.MakeMove();
+    return tic_tac_toe.MoveSelector();
+  } else if (gpio == BUTTON_2) {
+    return tic_tac_toe.MakeMove();
+  } else { // Reset
+    return tic_tac_toe.Reset();
   }
 }
 
@@ -160,7 +268,9 @@ int main() {
                                      button_debouncer);
   gpio_set_irq_enabled_with_callback(BUTTON_2, GPIO_FALLING, 1,
                                      button_debouncer);
-  gpio_put(LED_GREEN, true);                                   
+  gpio_set_irq_enabled_with_callback(BUTTON_3, GPIO_FALLING, 1,
+                                     button_debouncer);
+  gpio_put(LED_GREEN, true);
   while (true) {
     // Do game logic here
     // Switch players after each turn

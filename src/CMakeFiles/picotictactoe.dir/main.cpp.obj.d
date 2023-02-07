@@ -182,12 +182,6 @@ CMakeFiles/picotictactoe.dir/main.cpp.obj: \
  c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\ostream.tcc \
  c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\istream \
  c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\istream.tcc \
- c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\thread \
- c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\std_thread.h \
- c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\tuple \
- c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\uses_allocator.h \
- c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\unique_ptr.h \
- c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\this_thread_sleep.h \
  c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\vector \
  c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\stl_uninitialized.h \
  c:\progra~2\armgnu~1\12dbab~1.2re\arm-none-eabi\include\c++\12.2.1\bits\stl_vector.h \
