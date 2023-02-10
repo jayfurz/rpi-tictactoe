@@ -68,7 +68,6 @@ public:
       row_ = 0;
       col_ = 0;
     }
-    PrintSelectedSquare();
     return;
   }
 
@@ -93,7 +92,8 @@ public:
   TicTacToe() : board_(3, std::vector<char>(3, ' ')), current_player_() {}
   void MoveSelector() {
     if (!isGameOver) {
-      return current_player_.Move();
+      current_player_.Move();
+      PrintSelectedSquare();
     }
   }
 
@@ -216,6 +216,29 @@ private:
     std::cout << "\t" << board_[2][0] << "\t|\t" << board_[2][1] << "\t|\t"
               << board_[2][2] << "\t\n";
   }
+  
+  void PrintSelectedSquare() {
+    std::cout << "\033[2J\033[1;1H";  // clear the console
+    printf("Player %d is currently on square (%d, %d).\n", current_player_.GetPlayer(), current_player_.row(), current_player_.col());
+    for (int i = 0; i < 3; ++i) {
+        std::cout << std::endl << "\t \t|\t \t|\t \t\n";
+        for (int j = 0; j < 3; ++j) {
+            if (i == row_ && j == col_) {
+                std::cout << "\t[" << board_[i][j] << "]\t";
+            } else {
+                std::cout << "\t" << board_[i][j] << "\t";
+            }
+            if (j != 2) {
+                std::cout << "|";
+            }
+        }
+        if (i != 2) {
+            std::cout << "\n________________|_______________|_______________\n";
+        }
+    }
+    std::cout << std::endl;
+    busy_wait_ms(500000);  // wait for 0.5 second
+}
 
   std::vector<std::vector<char>> board_;
   CurrentPlayer current_player_;
@@ -267,14 +290,36 @@ void button_debouncer(uint gpio, uint32_t events) {
   return;
 }
 
+void button_1_irq_handler(void) {
+gpio_acknowledge_irq(BUTTON_1, GPIO_FALLING);
+button_debouncer(BUTTON_1, GPIO_FALLING);
+}
+
+void button_2_irq_handler(void) {
+gpio_acknowledge_irq(BUTTON_2, GPIO_FALLING);
+button_debouncer(BUTTON_2, GPIO_FALLING);
+}
+
+void button_3_irq_handler(void) {
+gpio_acknowledge_irq(BUTTON_3, GPIO_FALLING);
+button_debouncer(BUTTON_3, GPIO_FALLING);
+}
+
+void initialize_buttons() {
+// set up button 1 with a higher priority
+gpio_add_raw_irq_handler_with_order_priority(BUTTON_1, button_1_irq_handler,
+0x80);
+// set up button 2 with a medium priority
+gpio_add_raw_irq_handler_with_order_priority(BUTTON_2, button_2_irq_handler,
+0x7F);
+// set up button 3 with a lower priority
+gpio_add_raw_irq_handler_with_order_priority(BUTTON_3, button_3_irq_handler,
+0x70);
+}
+
 int main() {
   SetupHardware();
-  gpio_set_irq_enabled_with_callback(BUTTON_1, GPIO_FALLING, 1,
-                                     button_debouncer);
-  gpio_set_irq_enabled_with_callback(BUTTON_2, GPIO_FALLING, 1,
-                                     button_debouncer);
-  gpio_set_irq_enabled_with_callback(BUTTON_3, GPIO_FALLING, 1,
-                                     button_debouncer);
+  initialize_buttons();
   gpio_put(LED_GREEN, true);
   while (true) {
     // Do game logic here
