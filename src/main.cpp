@@ -68,7 +68,7 @@ public:
       row_ = 0;
       col_ = 0;
     }
-    PrintSelectedSquare();
+    //PrintSelectedSquare();
     return;
   }
 
@@ -93,7 +93,8 @@ public:
   TicTacToe() : board_(3, std::vector<char>(3, ' ')), current_player_() {}
   void MoveSelector() {
     if (!isGameOver) {
-      return current_player_.Move();
+      current_player_.Move();
+      PrintSelectedSquare();
     }
   }
 
@@ -108,9 +109,9 @@ public:
       // place the player's symbol in the cell
       board_[current_player_.row()][current_player_.col()] =
           current_player_.GetSymbol();
-      PrintGameBoard();
       if (!CheckWinCondition()) {
         current_player_.SwitchPlayer();
+        PrintSelectedSquare();
       }
       return;
     }
@@ -125,6 +126,7 @@ public:
     current_player_.SwitchPlayer(true);
     isGameOver = false;
     printf("Game reset!");
+    PrintSelectedSquare();
   }
 
 private:
@@ -172,7 +174,7 @@ private:
     return;
   }
 
-  void FlashBothPlayersLeds() {
+  void volatile FlashBothPlayersLeds() {
     int i = 0;
     while (true) {
       if (!gpio_get(BUTTON_3)) {
@@ -191,6 +193,7 @@ private:
   void FlashCurrentPlayerLed() {
     int current_led = current_player_.GetLed();
     int i = 0;
+
     while (true) {
       if (!gpio_get(BUTTON_3)) {
       gpio_put(current_led, false);
@@ -216,6 +219,28 @@ private:
     std::cout << "\t" << board_[2][0] << "\t|\t" << board_[2][1] << "\t|\t"
               << board_[2][2] << "\t\n";
   }
+
+    void PrintSelectedSquare() {
+    std::cout << "\033[2J\033[1;1H";  // clear the console
+    std::cout << "Player " << current_player_.GetPlayer() << "'s turn! The player's symbol is: " << current_player_.GetSymbol() << std::endl; 
+    for (int i = 0; i < 3; ++i) {
+        std::cout << std::endl << "\t \t|\t \t|\t \t\n";
+        for (int j = 0; j < 3; ++j) {
+            if (i == current_player_.row() && j == current_player_.col()) {
+                std::cout << "\t[" << board_[i][j] << "]\t";
+            } else {
+                std::cout << "\t" << board_[i][j] << "\t";
+            }
+            if (j != 2) {
+                std::cout << "|";
+            }
+        }
+        if (i != 2) {
+            std::cout << "\n________________|_______________|_______________\n";
+        }
+    }
+    std::cout << std::endl;
+}
 
   std::vector<std::vector<char>> board_;
   CurrentPlayer current_player_;
@@ -277,8 +302,6 @@ int main() {
                                      button_debouncer);
   gpio_put(LED_GREEN, true);
   while (true) {
-    // Do game logic here
-    // Switch players after each turn
   }
   return 0;
 }
